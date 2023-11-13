@@ -5,7 +5,6 @@
 import random
 
 import wx
-from tomlkit import value
 
 
 class MyWindow(wx.Frame):

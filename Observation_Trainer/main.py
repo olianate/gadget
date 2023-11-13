@@ -5,6 +5,7 @@
 import random
 
 import wx
+from tomlkit import value
 
 
 class MyWindow(wx.Frame):
@@ -19,8 +20,11 @@ class MyWindow(wx.Frame):
         self.correct_label = wx.StaticText(self.top_panel, label='正确数: 0')
         self.error_label = wx.StaticText(self.top_panel, label='错误数: 0')
         self.center_label = wx.StaticText(self.main_panel, label='Center Text')
-        self.time_label = wx.StaticText(
-            self.top_panel, label='位数: 2  时间：1000 ms')
+        time_label = wx.StaticText(self.top_panel, label='时间ms:')
+        nums_label = wx.StaticText(self.top_panel, label='位数')
+        self.nums_ctl = wx.SpinCtrl(self.top_panel, value='2', min=2, max=6)
+        self.time_ctl = wx.SpinCtrl(
+            self.top_panel, value='1000', min=200, max=1000)
 
         # 设置标签的字体和颜色
         font = wx.Font(12, wx.FONTFAMILY_DEFAULT,
@@ -36,8 +40,11 @@ class MyWindow(wx.Frame):
             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_MEDIUM))
         self.center_label.SetForegroundColour(wx.BLACK)
 
-        self.time_label.SetFont(font)
-        self.time_label.SetForegroundColour(wx.BLACK)
+        time_label.SetFont(font)
+        time_label.SetForegroundColour(wx.BLACK)
+
+        nums_label.SetFont(font)
+        nums_label.SetForegroundColour(wx.BLACK)
 
         # 添加输入文本框
         self.input_text = wx.TextCtrl(
@@ -55,7 +62,10 @@ class MyWindow(wx.Frame):
         topsizer.Add(self.correct_label, 0, wx.ALL, 5)
         topsizer.Add(self.error_label, 0, wx.ALL, 5)
         topsizer.AddStretchSpacer(1)
-        topsizer.Add(self.time_label, 0, wx.ALL, 5)
+        topsizer.Add(nums_label, 0, wx.ALL, 5)
+        topsizer.Add(self.nums_ctl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        topsizer.Add(time_label, 0, wx.ALL, 5)
+        topsizer.Add(self.time_ctl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         self.top_panel.SetSizer(topsizer)
 
         # 设置主面板的布局
@@ -81,20 +91,21 @@ class MyWindow(wx.Frame):
         self.center_label.Hide()
         self.input_text.Hide()
 
-        # 绑定输入文本框的事件处理程序
-        # self.input_text.Bind(wx.EVT_TEXT_ENTER, self.on_input_enter)
+        # 绑定事件
+        self.time_ctl.Bind(wx.EVT_SPINCTRL, self.on_time_changed)
+        self.nums_ctl.Bind(wx.EVT_SPINCTRL, self.on_nums_changed)
 
-        # 初始化正确数和错误数
-        self.correct_count = 0
-        self.error_count = 0
+    def on_time_changed(self, event):
+        self.display_time = event.GetEventObject().GetValue()
 
-        # 启动定时器
-        # self.start_timer()
+    def on_nums_changed(self, event):
+        self.nums = event.GetEventObject().GetValue()
 
     def set_display_time(self, nums, display_time):
         self.nums = nums
         self.display_time = display_time
-        self.time_label.SetLabel(f'位数: {self.nums}  时间：{self.display_time} ms')
+        self.time_ctl.SetValue(display_time)
+        self.nums_ctl.SetValue(nums)
 
     def start_timer(self, event):
         self.timer.Stop()
@@ -108,6 +119,8 @@ class MyWindow(wx.Frame):
     def start(self, event):
         self.finished = False
         self.set_display_time(2, 1000)
+        self.correct_count = 0
+        self.error_count = 0
         self.start_btn.Hide()
 
         self.center_label.SetLabel('Ready!')
@@ -208,5 +221,10 @@ class MyWindow(wx.Frame):
 
 
 app = wx.App()
-MyWindow().Show()
+
+frame = MyWindow()
+frame.SetSize((500, 400))
+frame.Show()
+
+
 app.MainLoop()
